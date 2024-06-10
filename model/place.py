@@ -1,3 +1,6 @@
+import uuid
+from datetime import datetime
+
 class Place:
     def __init__(self, name, description, address, city, latitude, longitude, host, num_rooms, bathrooms, price_per_night, max_guests, amenities=None, reviews=None):
         self.id = uuid.uuid4()  # Unique ID
