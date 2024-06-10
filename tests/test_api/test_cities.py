@@ -1,5 +1,6 @@
 import unittest
 from api import app
+from model.city import City
 
 class TestCitiesAPI(unittest.TestCase):
     def setUp(self):
@@ -16,7 +17,6 @@ class TestCitiesAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_city(self):
-        # Ensure there's a city to retrieve
         create_response = self.app.post('/cities', json={"name": "Los Angeles", "country_code": "US"})
         city_id = create_response.json['id']
         response = self.app.get(f'/cities/{city_id}')
@@ -24,7 +24,6 @@ class TestCitiesAPI(unittest.TestCase):
         self.assertIn('name', response.json)
 
     def test_update_city(self):
-        # Ensure there's a city to update
         create_response = self.app.post('/cities', json={"name": "Seattle", "country_code": "US"})
         city_id = create_response.json['id']
         response = self.app.put(f'/cities/{city_id}', json={"name": "New Seattle"})
@@ -32,12 +31,10 @@ class TestCitiesAPI(unittest.TestCase):
         self.assertEqual(response.json['name'], "New Seattle")
 
     def test_delete_city(self):
-        # Ensure there's a city to delete
         create_response = self.app.post('/cities', json={"name": "Portland", "country_code": "US"})
         city_id = create_response.json['id']
         response = self.app.delete(f'/cities/{city_id}')
         self.assertEqual(response.status_code, 204)
-        # Verify deletion
         get_response = self.app.get(f'/cities/{city_id}')
         self.assertEqual(get_response.status_code, 404)
 
