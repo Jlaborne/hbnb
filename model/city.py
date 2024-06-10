@@ -1,14 +1,16 @@
 from persistence.data_manager import DataManager
+import uuid
+from datetime import datetime
 
 class City:
     data_manager = DataManager()
 
-    def __init__(self, name, country_code):
-        self.id = None
+    def __init__(self, name, country):
+        self.id = uuid.uuid4()  # Unique ID
         self.name = name
-        self.country_code = country_code
-        self.created_at = None
-        self.updated_at = None
+        self.country = country
+        self.created_at = datetime.now()  # Creation Date
+        self.updated_at = self.created_at  # Update Date
 
     def save(self):
         return City.data_manager.save(self)
