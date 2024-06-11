@@ -12,6 +12,14 @@ class User:
         self.updated_at = self.created_at  # Update Date
         self.reviews = []
 
+        # Check if email already exists
+        for user in User.users:
+            if user.email == email:
+                raise ValueError("User with this email already exists")
+
+        # If email doesn't exist, add the user to the list
+        User.users.append(self)
+
     def add_review(self, review):
         self.reviews.append(review)
         self.updated_at = datetime.now()
