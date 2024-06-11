@@ -6,7 +6,7 @@ from model.user import User  # Assuming the User class is in user.py
 
 class TestUser(unittest.TestCase):
     def setUp(self):
-        self.user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
+        self.user = None
 
     def test_user_creation(self):
         self.assertIsInstance(self.user.id, uuid.UUID)
