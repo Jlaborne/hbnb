@@ -17,6 +17,28 @@ class TestUser(unittest.TestCase):
         self.assertIsInstance(self.user.created_at, datetime)
         self.assertEqual(self.user.created_at, self.user.updated_at)
 
+    def test_unique_email_constraint(self):
+        # Test creating multiple users with the same email
+        email = 'john.doe@example.com'
+        user1 = User(email, 'securepassword123', 'John', 'Doe')
+        with self.assertRaises(ValueError):
+            user2 = User(email, 'anotherpassword123', 'Jane', 'Doe')
+
+    def test_valid_user_creation(self):
+        # Test valid user creation
+        user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
+        self.assertIsNotNone(user)
+    
+    def test_invalid_user_creation_missing_fields(self):
+        # Test invalid user creation with missing fields
+        with self.assertRaises(TypeError):
+            user = User('john.doe@example.com', 'securepassword123')
+
+    def test_invalid_user_creation_invalid_email(self):
+        # Test invalid user creation with invalid email format
+        with self.assertRaises(ValueError):
+            user = User('invalidemail', 'securepassword123', 'John', 'Doe')
+
     def test_add_review(self):
         initial_updated_at = self.user.updated_at
         self.user.add_review('Great place!')
