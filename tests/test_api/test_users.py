@@ -27,3 +27,5 @@ class TestUser(unittest.TestCase):
         self.user.set_password('newpassword123')
         self.assertEqual(self.user.get_password(), 'newpassword123')
         self.assertNotEqual(self.user.updated_at, initial_updated_at)
+if __name__ == '__main__':
+    unittest.main()
