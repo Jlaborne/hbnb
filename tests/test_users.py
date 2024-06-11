@@ -26,13 +26,13 @@ class TestUser(unittest.TestCase):
 
     def test_valid_user_creation(self):
         # Test valid user creation
-        user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
+        user = User('john.doe1@example.com', 'securepassword123', 'John', 'Doe')
         self.assertIsNotNone(user)
     
     def test_invalid_user_creation_missing_fields(self):
         # Test invalid user creation with missing fields
         with self.assertRaises(TypeError):
-            user = User('john.doe@example.com', 'securepassword123')
+            user = User('john.doe2@example.com', 'securepassword123')
 
     def test_invalid_user_creation_invalid_email(self):
         # Test invalid user creation with invalid email format
