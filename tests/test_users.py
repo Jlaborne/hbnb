@@ -6,7 +6,7 @@ from model.user import User  # Assuming the User class is in user.py
 
 class TestUser(unittest.TestCase):
     def setUp(self):
-        self.user = None
+        self.user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
 
     def test_user_creation(self):
         self.assertIsInstance(self.user.id, uuid.UUID)
@@ -50,5 +50,6 @@ class TestUser(unittest.TestCase):
         self.user.set_password('newpassword123')
         self.assertEqual(self.user.get_password(), 'newpassword123')
         self.assertNotEqual(self.user.updated_at, initial_updated_at)
+
 if __name__ == '__main__':
     unittest.main()
