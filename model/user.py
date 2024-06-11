@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 class User:
+    users = []
     def __init__(self, email, password, first_name, last_name):
         self.id = uuid.uuid4()
         self.email = email
