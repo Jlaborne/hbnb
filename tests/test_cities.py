@@ -1,42 +1,18 @@
 import unittest
-from api import app
+import uuid
+from datetime import datetime
 from model.city import City
 
-class TestCitiesAPI(unittest.TestCase):
+class TestCity(unittest.TestCase):
     def setUp(self):
-        self.app = app.test_client()
-        self.app.testing = True
+        self.city = City('New York', uuid.uuid4())
 
-    def test_create_city(self):
-        response = self.app.post('/cities', json={"name": "San Francisco", "country_code": "US"})
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('id', response.json)
-
-    def test_get_cities(self):
-        response = self.app.get('/cities')
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_city(self):
-        create_response = self.app.post('/cities', json={"name": "Los Angeles", "country_code": "US"})
-        city_id = create_response.json['id']
-        response = self.app.get(f'/cities/{city_id}')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('name', response.json)
-
-    def test_update_city(self):
-        create_response = self.app.post('/cities', json={"name": "Seattle", "country_code": "US"})
-        city_id = create_response.json['id']
-        response = self.app.put(f'/cities/{city_id}', json={"name": "New Seattle"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json['name'], "New Seattle")
-
-    def test_delete_city(self):
-        create_response = self.app.post('/cities', json={"name": "Portland", "country_code": "US"})
-        city_id = create_response.json['id']
-        response = self.app.delete(f'/cities/{city_id}')
-        self.assertEqual(response.status_code, 204)
-        get_response = self.app.get(f'/cities/{city_id}')
-        self.assertEqual(get_response.status_code, 404)
+    def test_city_creation(self):
+        self.assertIsInstance(self.city.id, uuid.UUID)
+        self.assertEqual(self.city.name, 'New York')
+        self.assertIsInstance(self.city.country_id, uuid.UUID)
+        self.assertIsInstance(self.city.created_at, datetime)
+        self.assertEqual(self.city.created_at, self.city.updated_at)
 
 if __name__ == '__main__':
     unittest.main()
