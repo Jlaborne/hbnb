@@ -1,21 +1,24 @@
-import uuid
-from datetime import datetime
-
 class Place:
-    def __init__(self, name, description, address, city, latitude, longitude, host, num_rooms, bathrooms, price_per_night, max_guests, amenities=None, reviews=None):
-        self.id = uuid.uuid4()  # Unique ID
+    def __init__(self, name, description, address, city_id, latitude, longitude, host_id, num_rooms, num_bathrooms, price_per_night, max_guests):
+        self.id = uuid.uuid4()
         self.name = name
         self.description = description
         self.address = address
-        self.city = city
+        self.city_id = city_id
         self.latitude = latitude
         self.longitude = longitude
-        self.host = host
+        self.host_id = host_id
         self.num_rooms = num_rooms
-        self.bathrooms = bathrooms
+        self.num_bathrooms = num_bathrooms
         self.price_per_night = price_per_night
         self.max_guests = max_guests
-        self.amenities = amenities if amenities is not None else []
-        self.reviews = reviews if reviews is not None else []
-        self.created_at = datetime.now()  # Creation Date
-        self.updated_at = self.created_at  # Update Date
+        self.created_at = datetime.now()
+        self.updated_at = self.created_at
+        self.amenities = []
+
+    def add_amenity(self, amenity):
+        self.amenities.append(amenity)
+        self.updated_at = datetime.now()
+
+    def __str__(self):
+        return f"Place: {self.name}, Address: {self.address}, City ID: {self.city_id}, Host ID: {self.host_id}"
