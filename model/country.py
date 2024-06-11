@@ -1,4 +1,3 @@
 class Country:
-    def __init__(self, code, name):
-        self.code = code
+    def __init__(self, name):
         self.name = name
