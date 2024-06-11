@@ -1,7 +1,7 @@
 import unittest
 import uuid
 from datetime import datetime
-from place import Place  # Assuming the Place class is in place.py
+from model.place import Place  # Assuming the Place class is in place.py
 
 class TestPlace(unittest.TestCase):
     def setUp(self):

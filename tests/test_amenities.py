@@ -1,7 +1,7 @@
 import unittest
 import uuid
 from datetime import datetime
-from amenity import Amenity  # Assuming the Amenity class is in amenity.py
+from model.amenity import Amenity  # Assuming the Amenity class is in amenity.py
 
 class TestAmenity(unittest.TestCase):
     def setUp(self):

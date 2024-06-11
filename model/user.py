@@ -14,6 +14,7 @@ class User:
 
     def add_review(self, review):
         self.reviews.append(review)
+        self.updated_at = datetime.now()
 
     def get_password(self):
         return self.__password

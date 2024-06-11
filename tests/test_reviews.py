@@ -1,7 +1,7 @@
 import unittest
 import uuid
 from datetime import datetime
-from review import Review  # Assuming the Review class is in review.py
+from model.review import Review  # Assuming the Review class is in review.py
 
 class TestReview(unittest.TestCase):
     def setUp(self):
