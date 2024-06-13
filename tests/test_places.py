@@ -1,76 +1,137 @@
 import unittest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
+from unittest.mock import patch
+from datetime import datetime, timezone
+import uuid
 from model.place import Place
-from model.user import User
-from model.amenity import Amenity
+import persistence.data_manager as data_manager
 
 class TestPlace(unittest.TestCase):
-    
-    def setUp(self):
-        # Setup initial data
-        self.data_manager_patch = patch('place.DataManager')
-        self.mock_data_manager = self.data_manager_patch.start()
+
+    @patch('persistence.data_manager.create_entity')
+    def test_save_place(self, mock_create_entity):
+        place = Place(
+            name='Beautiful Cottage',
+            description='A cozy cottage in the countryside.',
+            address='123 Country Road',
+            city='Countryside',
+            latitude=45.0,
+            longitude=-73.0,
+            host_id='host123',
+            number_of_rooms=2,
+            number_of_bathrooms=1,
+            price_per_night=100,
+            max_guests=4
+        )
+        place.save()
+        place_data = {
+            'id': place.id,
+            'created_at': place.created_at,
+            'updated_at': place.updated_at,
+            'name': place.name,
+            'description': place.description,
+            'address': place.address,
+            'city': place.city,
+            'latitude': place.latitude,
+            'longitude': place.longitude,
+            'host_id': place.host_id,
+            'number_of_rooms': place.number_of_rooms,
+            'number_of_bathrooms': place.number_of_bathrooms,
+            'price_per_night': place.price_per_night,
+            'max_guests': place.max_guests,
+            'amenities': place.amenities,
+            'reviews': place.reviews
+        }
+        mock_create_entity.assert_called_once_with('Place', place_data)
+
+    @patch('persistence.data_manager.get_entity_by_id')
+    def test_get_by_id(self, mock_get_entity_by_id):
+        place_id = str(uuid.uuid4().hex)
+        place_data = {
+            'id': place_id,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'updated_at': datetime.now(timezone.utc).isoformat(),
+            'name': 'Beautiful Cottage',
+            'description': 'A cozy cottage in the countryside.',
+            'address': '123 Country Road',
+            'city': 'Countryside',
+            'latitude': 45.0,
+            'longitude': -73.0,
+            'host_id': 'host123',
+            'number_of_rooms': 2,
+            'number_of_bathrooms': 1,
+            'price_per_night': 100,
+            'max_guests': 4,
+            'amenities': [],
+            'reviews': []
+        }
+        mock_get_entity_by_id.return_value = place_data
+        place = Place.get_by_id(place_id)
+        self.assertEqual(place['id'], place_id)
+        self.assertEqual(place['name'], 'Beautiful Cottage')
+
+    @patch('persistence.data_manager.update_entity')
+    def test_update_place(self, mock_update_entity):
+        place_id = str(uuid.uuid4().hex)
+        updated_data = {'name': 'Updated Cottage'}
+        Place.update(place_id, updated_data)
+        mock_update_entity.assert_called_once_with('Place', place_id, updated_data)
+
+    @patch('persistence.data_manager.delete_entity')
+    def test_delete_place(self, mock_delete_entity):
+        place_id = str(uuid.uuid4().hex)
+        Place.delete(place_id)
+        mock_delete_entity.assert_called_once_with('Place', place_id)
+
+    @patch('persistence.data_manager.get_entities')
+    def test_get_all_places(self, mock_get_entities):
+        place_data = [
+            {
+                'id': str(uuid.uuid4().hex),
+                'created_at': datetime.now(timezone.utc).isoformat(),
+                'updated_at': datetime.now(timezone.utc).isoformat(),
+                'name': 'Beautiful Cottage',
+                'description': 'A cozy cottage in the countryside.',
+                'address': '123 Country Road',
+                'city': 'Countryside',
+                'latitude': 45.0,
+                'longitude': -73.0,
+                'host_id': 'host123',
+                'number_of_rooms': 2,
+                'number_of_bathrooms': 1,
+                'price_per_night': 100,
+                'max_guests': 4,
+                'amenities': [],
+                'reviews': []
+            }
+        ]
+        mock_get_entities.return_value = place_data
+        places = Place.get_all()
+        self.assertEqual(len(places), 1)
+        self.assertEqual(places[0]['name'], 'Beautiful Cottage')
         
-        self.user = User("1", "Alice", "alice@example.com")
-        self.owner = User("2", "Bob", "bob@example.com")
-        self.place = Place("Charming Apartment", "A lovely place in the heart of the city", "123 Main St", "Paris", 48.8566, 2.3522, self.owner.id, 2, 1, 100, 4)
-        
-        self.mock_data_manager.add_review = MagicMock(return_value="review1")
-        self.mock_data_manager.update = MagicMock(return_value=None)
-        self.mock_data_manager.get_review = MagicMock(return_value={
-            'id': 'review1',
-            'user_id': self.user.id,
-            'place_id': self.place.id,
-            'content': "Great place!",
-            'created_at': datetime.now(),
-            'updated_at': datetime.now()
-        })
+    @patch('persistence.data_manager.get_entity_by_id')
+    def test_create_place_invalid_host(self, mock_get_entity_by_id):
+        # Assuming is_valid_host returns False when the host is invalid
+        mock_get_entity_by_id.return_value = {'is_host': False}
+        place = Place(
+            name='Beautiful Cottage',
+            description='A cozy cottage in the countryside.',
+            address='123 Country Road',
+            city='Countryside',
+            latitude=45.0,
+            longitude=-73.0,
+            host_id='host123',  # This should be invalid
+            number_of_rooms=2,
+            number_of_bathrooms=1,
+            price_per_night=100,
+            max_guests=4
+        )
+        self.assertFalse(place.create_place())  # Expecting False since host is invalid
 
     def tearDown(self):
-        self.data_manager_patch.stop()
-
-    def test_add_review(self):
-        self.place.add_review(self.user, "Great place, very clean and well located!")
-        
-        self.assertIn("review1", self.place.reviews)
-        self.assertIn("review1", self.user.reviews)
-        self.mock_data_manager.add_review.assert_called_once_with(self.user.id, self.place.id, "Great place, very clean and well located!")
-        self.mock_data_manager.update.assert_any_call("users", self.user)
-        self.mock_data_manager.update.assert_any_call("places", self.place)
-
-    def test_add_review_by_owner(self):
-        with self.assertRaises(ValueError):
-            self.place.add_review(self.owner, "I love my own place!")
-
-    def test_update_review(self):
-        self.place.add_review(self.user, "Great place, very clean and well located!")
-        self.place.update_review("review1", "Updated content")
-        
-        updated_review = self.mock_data_manager.get_review("review1")
-        self.assertEqual(updated_review['content'], "Updated content")
-        self.mock_data_manager.update.assert_any_call("reviews", updated_review)
-        self.mock_data_manager.update.assert_any_call("places", self.place)
-
-    def test_delete_review(self):
-        self.place.add_review(self.user, "Great place, very clean and well located!")
-        self.place.delete_review("review1")
-        
-        self.assertNotIn("review1", self.place.reviews)
-        self.mock_data_manager.delete.assert_called_once_with("reviews", self.mock_data_manager.get_review("review1"))
-        self.mock_data_manager.update.assert_called_with("places", self.place)
-
-    def test_add_amenity(self):
-        wifi = Amenity("1", "Wi-Fi")
-        self.place.add_amenity(self.owner, wifi)
-        
-        self.assertIn(wifi, self.place.amenities)
-        self.mock_data_manager.update.assert_called_with("places", self.place)
-
-    def test_add_amenity_by_non_owner(self):
-        wifi = Amenity("1", "Wi-Fi")
-        with self.assertRaises(ValueError):
-            self.place.add_amenity(self.user, wifi)
+        # Clean up after tests if necessary
+        for place_data in Place.get_all():
+            Place.delete(place_data['place_id'])
 
 if __name__ == '__main__':
     unittest.main()

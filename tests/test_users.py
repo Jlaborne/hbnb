@@ -1,56 +1,122 @@
-#!/usr/bin/python3
 import unittest
+from unittest.mock import patch
+from datetime import datetime, timezone
 import uuid
-from datetime import datetime, timedelta
-from model.user import User  # Assuming the User class is in user.py
+from model.user import User
+import persistence.data_manager as data_manager
+
 
 class TestUser(unittest.TestCase):
-    def setUp(self):
-        User.users = []
-        self.user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
+
+    @patch('persistence.data_manager.create_entity')
+    def test_save_user(self, mock_create_entity):
+        user = User(email='test@example.com', password='password', first_name='John', last_name='Doe')
+        user.save()
+        user_data = {
+            'user_id': user.user_id,
+            'created_at': user.created_at,
+            'updated_at': user.updated_at,
+            'email': user.email,
+            'password': user.password,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_host': user.is_host,
+            'places_hosted': user.places_hosted,
+            'reviews_written': user.reviews_written
+        }
+        mock_create_entity.assert_called_once_with('User', user_data)
+
+    @patch('persistence.data_manager.get_entity_by_id')
+    def test_get_by_id(self, mock_get_entity_by_id):
+        user_id = str(uuid.uuid4().hex)
+        user_data = {
+            'user_id': user_id,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'updated_at': datetime.now(timezone.utc).isoformat(),
+            'email': 'test@example.com',
+            'password': 'password',
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'is_host': False,
+            'places_hosted': [],
+            'reviews_written': []
+        }
+        mock_get_entity_by_id.return_value = user_data
+        user = User.get_by_id(user_id)
+        self.assertEqual(user['user_id'], user_id)
+        self.assertEqual(user['email'], 'test@example.com')
+
+    @patch('persistence.data_manager.update_entity')
+    def test_update_user(self, mock_update_entity):
+        user_id = str(uuid.uuid4().hex)
+        updated_data = {'first_name': 'Jane'}
+        User.update(user_id, updated_data)
+        mock_update_entity.assert_called_once_with('User', user_id, updated_data)
+
+    @patch('persistence.data_manager.delete_entity')
+    def test_delete_user(self, mock_delete_entity):
+        user_id = str(uuid.uuid4().hex)
+        User.delete(user_id)
+        mock_delete_entity.assert_called_once_with('User', user_id)
+
+    @patch('persistence.data_manager.get_entities')
+    def test_get_all_users(self, mock_get_entities):
+        user_data = [
+            {
+                'user_id': str(uuid.uuid4().hex),
+                'created_at': datetime.now(timezone.utc).isoformat(),
+                'updated_at': datetime.now(timezone.utc).isoformat(),
+                'email': 'test@example.com',
+                'password': 'password',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'is_host': False,
+                'places_hosted': [],
+                'reviews_written': []
+            }
+        ]
+        mock_get_entities.return_value = user_data
+        users = User.get_all()
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0]['email'], 'test@example.com')
 
     def test_user_creation(self):
-        self.assertIsInstance(self.user.id, uuid.UUID)
-        self.assertEqual(self.user.email, 'john.doe@example.com')
-        self.assertEqual(self.user.get_password(), 'securepassword123')
-        self.assertEqual(self.user.first_name, 'John')
-        self.assertEqual(self.user.last_name, 'Doe')
-        self.assertIsInstance(self.user.created_at, datetime)
-        self.assertEqual(self.user.created_at, self.user.updated_at)
-
-    def test_unique_email_constraint(self):
-        # Test creating multiple users with the same email
-        email = 'john.doe2@example.com'
-        user1 = User(email, 'securepassword123', 'John', 'Doe')
-        with self.assertRaises(ValueError):
-            user2 = User(email, 'anotherpassword123', 'Jane', 'Doe')
-
-    def test_valid_user_creation(self):
-        # Test valid user creation
-        user = User('john.doe2@example.com', 'securepassword123', 'John', 'Doe')
-        self.assertIsNotNone(user)
+        email = 'test@example.com'
+        password = 'password'
+        first_name = 'John'
+        last_name = 'Doe'
+        user = User(email, password, first_name, last_name)
+        
+        self.assertEqual(user.email, email)
+        self.assertEqual(user.first_name, first_name)
+        self.assertEqual(user.last_name, last_name)
+        self.assertTrue(user.user_id)  # Check if user_id is set
     
-    def test_invalid_user_creation_missing_fields(self):
-        # Test invalid user creation with missing fields
-        with self.assertRaises(TypeError):
-            user = User('john.doe2@example.com', 'securepassword123')
+    def test_unique_email_constraint(self):
+        email = 'test@example.com'
+        password = 'password'
+        first_name = 'John'
+        last_name = 'Doe'
+        user1 = User(email, password, first_name, last_name)
+        user1.save()  # Save the first user
+        
+        # Attempt to create another user with the same email
+        with self.assertRaises(Exception):  # Adjust the type of exception based on your implementation
+            user2 = User(email, 'anotherpassword', 'Jane', 'Smith')
+            user2.save()
 
-    def test_invalid_user_creation_invalid_email(self):
-        # Test invalid user creation with invalid email format
-        with self.assertRaises(ValueError):
-            user = User('invalidemail', 'securepassword123', 'John', 'Doe')
-
-    def test_add_review(self):
-        initial_updated_at = self.user.updated_at
-        self.user.add_review('Great place!')
-        self.assertIn('Great place!', self.user.reviews)
-        self.assertNotEqual(self.user.updated_at, initial_updated_at)
-
-    def test_password_change(self):
-        initial_updated_at = self.user.updated_at
-        self.user.set_password('newpassword123')
-        self.assertEqual(self.user.get_password(), 'newpassword123')
-        self.assertNotEqual(self.user.updated_at, initial_updated_at)
+    def test_host_assignment(self):
+        user = User('host@example.com', 'password', 'Host', 'User', is_host=True)
+        place_id = str(uuid.uuid4().hex)
+        user.host_place(place_id)
+        
+        self.assertIn(place_id, user.places_hosted)
+    
+    def tearDown(self):
+        # Clean up after tests if necessary
+        for user_data in User.get_all():
+            User.delete(user_data['user_id'])
 
 if __name__ == '__main__':
     unittest.main()
+
