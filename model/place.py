@@ -55,13 +55,13 @@ class Place:
         self.updated_at = datetime.now()
         """
     def add_review(self, user, content):
-        if self.owner_id == user.id:
+        if self.host_id == user.id:
             raise ValueError("Cannot add review for a place you own")
 
         review_id = self.data_manager.add_review(user.id, self.id, content)
         self.reviews.append(review_id)
         user.reviews.append(review_id)
-        user.updated_at = datetime.datetime.now()
+        user.updated_at = datetime.now()
         self.data_manager.update("users", user)
         return self.data_manager.update("places", self)
 
