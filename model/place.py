@@ -22,19 +22,34 @@ class Place:
         self.reviews = []  # List to store reviews
 
     def add_amenity(self, amenity):
-        self.amenities.append(amenity)
-        self.updated_at = datetime.now()
+        if not self.owner_id == user.id:
+            raise ValueError("Cannot add review for a place you don't own")
+        if amenity not in self.amenities:
+            self.amenities.append(amenity)
+        return self.data_manager.update("places", self)
 
-    def add_review(self, user_id, content):
+    """def add_review(self, user_id, place_id, content):
         review = {
             'id': str(uuid.uuid4()),
             'user_id': user_id,
+            'place_id': place_id,
             'content': content,
             'created_at': datetime.now(),
             'updated_at': datetime.now()
         }
         self.reviews.append(review)
         self.updated_at = datetime.now()
+        """
+    def add_review(self, user, content):
+        if self.owner_id == user.id:
+            raise ValueError("Cannot add review for a place you own")
+
+        review_id = self.data_manager.add_review(user.id, self.id, content)
+        self.reviews.append(review_id)
+        user.reviews.append(review_id)
+        user.updated_at = datetime.datetime.now()
+        self.data_manager.update("users", user)
+        return self.data_manager.update("places", self)
 
     def update_review(self, review_id, new_content):
         for review in self.reviews:
