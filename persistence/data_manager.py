@@ -5,16 +5,16 @@ from persistence.ipersistence_manager import IPersistenceManager
 class DataManager(IPersistenceManager):
     def __init__(self):
         self.data = {
-            "users": {},
-            "places": {},
+            "user": {},
+            "place": {},
             "reviews": {},
-            "amenities": {},
-            "countries": {
+            "amenity": {},
+            "country": {
                 "US": {"code": "US", "name": "United States"},
                 "CA": {"code": "CA", "name": "Canada"},
                 # Add more countries as needed
             },
-            "cities": {}
+            "city": {}
         }
 
     def save(self, entity):
