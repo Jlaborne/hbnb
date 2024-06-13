@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-
+import persistence.data_manger
 class User:
     def __init__(self, email, password, first_name, last_name, is_host=False):
         self.user_id = uuid.uuid4().hex
