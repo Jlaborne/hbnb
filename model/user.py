@@ -43,7 +43,7 @@ class User:
     def delete(self):
         return User.data_manager.delete("users", self)
 
-    def add_review(self, place_id, content):
+    def add_review(self, user_id, place_id, content):
         # Check if the user owns the place associated with the review
         place_host_id = User.data_manager.get_place_host_id(place_id)  # Example method to get place host ID
         if place_host_id == self.id:
