@@ -21,6 +21,18 @@ class Place:
         self.amenities = []
         self.reviews = []  # List to store reviews
 
+    def save(self):
+        return Place.data_manager.save("places", self)
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        self.updated_at = datetime.now()
+        return Place.data_manager.update("places", self)
+
+    def delete(self):
+        return Place.data_manager.delete("places", self)
+
     def add_amenity(self, amenity):
         if not self.owner_id == user.id:
             raise ValueError("Cannot add review for a place you don't own")
