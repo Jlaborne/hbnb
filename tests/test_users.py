@@ -6,6 +6,7 @@ from model.user import User  # Assuming the User class is in user.py
 
 class TestUser(unittest.TestCase):
     def setUp(self):
+        User.users = []
         self.user = User('john.doe@example.com', 'securepassword123', 'John', 'Doe')
 
     def test_user_creation(self):
@@ -19,14 +20,14 @@ class TestUser(unittest.TestCase):
 
     def test_unique_email_constraint(self):
         # Test creating multiple users with the same email
-        email = 'john.doe@example.com'
+        email = 'john.doe2@example.com'
         user1 = User(email, 'securepassword123', 'John', 'Doe')
         with self.assertRaises(ValueError):
             user2 = User(email, 'anotherpassword123', 'Jane', 'Doe')
 
     def test_valid_user_creation(self):
         # Test valid user creation
-        user = User('john.doe1@example.com', 'securepassword123', 'John', 'Doe')
+        user = User('john.doe2@example.com', 'securepassword123', 'John', 'Doe')
         self.assertIsNotNone(user)
     
     def test_invalid_user_creation_missing_fields(self):
